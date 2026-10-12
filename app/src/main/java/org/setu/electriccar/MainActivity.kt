@@ -1,20 +1,145 @@
 package org.setu.electriccar
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var listLayout: LinearLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+
+        val scroll = createUserInterface()
+
+        ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::listLayout.isInitialized) {
+            displayStations()
+        }
+    }
+
+    private fun createUserInterface(): ScrollView {
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 32, 32, 32)
+        }
+
+        val title = TextView(this).apply {
+            text = "Charging Stations"
+            textSize = 28f
+            gravity = Gravity.CENTER
+        }
+
+        val addButton = Button(this).apply {
+            text = "Add Station"
+            setOnClickListener {
+                val intent = Intent(this@MainActivity, AddEditStationActivity::class.java)
+                startActivity(intent)
+            }
+        }
+
+        listLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        root.addView(title)
+        root.addView(addButton)
+        root.addView(listLayout)
+
+        val scroll = ScrollView(this)
+        scroll.addView(root)
+        setContentView(scroll)
+
+        displayStations()
+        return scroll
+    }
+
+    private fun displayStations() {
+
+        listLayout.removeAllViews()
+
+        val stations = AppData.stations.findAll()
+
+        if (stations.isEmpty()) {
+            listLayout.addView(TextView(this).apply {
+                text = "No charging stations yet."
+                textSize = 18f
+                setPadding(0, 40, 0, 40)
+            })
+            return
+        }
+
+        for (station in stations) {
+
+            val stationLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, 20, 0, 20)
+            }
+
+            val stationName = TextView(this).apply {
+                text = "${station.stationId}: ${station.name}"
+                textSize = 20f
+            }
+
+            val stationAddress = TextView(this).apply {
+                text = station.address
+                textSize = 16f
+            }
+
+            val stationHours = TextView(this).apply {
+                text = "Open: ${station.openingHours}"
+                textSize = 14f
+            }
+
+            val stationPoints = TextView(this).apply {
+                text = "Charging points: ${station.chargingPoints.size}"
+                textSize = 14f
+            }
+
+            val editButton = Button(this).apply {
+                text = "Edit"
+                setOnClickListener {
+                    val intent = Intent(this@MainActivity, AddEditStationActivity::class.java)
+                    intent.putExtra("id", station.stationId)
+                    startActivity(intent)
+                }
+            }
+
+            val deleteButton = Button(this).apply {
+                text = "Delete"
+                setOnClickListener {
+                    AppData.stations.delete(station.stationId)
+                    displayStations()
+                }
+            }
+
+            stationLayout.addView(stationName)
+            stationLayout.addView(stationAddress)
+            stationLayout.addView(stationHours)
+            stationLayout.addView(stationPoints)
+            stationLayout.addView(editButton)
+            stationLayout.addView(deleteButton)
+
+            listLayout.addView(stationLayout)
         }
     }
 }
