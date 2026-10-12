@@ -18,6 +18,15 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".ChargingPointsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AddEditPointActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
