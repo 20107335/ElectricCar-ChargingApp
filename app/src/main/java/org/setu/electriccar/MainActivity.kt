@@ -131,6 +131,14 @@ class MainActivity : AppCompatActivity() {
                     displayStations()
                 }
             }
+            val viewPointsButton = Button(this).apply {
+                text = "View Points"
+                setOnClickListener {
+                    val intent = Intent(this@MainActivity, ChargingPointsActivity::class.java)
+                    intent.putExtra("stationId", station.stationId)
+                    startActivity(intent)
+                }
+            }
 
             stationLayout.addView(stationName)
             stationLayout.addView(stationAddress)
@@ -138,7 +146,7 @@ class MainActivity : AppCompatActivity() {
             stationLayout.addView(stationPoints)
             stationLayout.addView(editButton)
             stationLayout.addView(deleteButton)
-
+            stationLayout.addView(viewPointsButton)
             listLayout.addView(stationLayout)
         }
     }
