@@ -6,4 +6,8 @@ data class Vehicle(
     var model: String = "",
     var batteryCapacity: Int = 0,
     var connectorType: String = ""
-)
+) {
+    fun getRange(): Int {
+        return batteryCapacity * 6
+    }
+}
