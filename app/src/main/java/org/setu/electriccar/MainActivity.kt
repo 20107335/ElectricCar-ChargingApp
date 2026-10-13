@@ -57,12 +57,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val vehiclesButton = Button(this).apply {
+            text = "My Vehicles"
+            setOnClickListener {
+                val intent = Intent(this@MainActivity, VehicleListActivity::class.java)
+                startActivity(intent)
+            }
+        }
+
         listLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
 
         root.addView(title)
         root.addView(addButton)
+        root.addView(vehiclesButton)
         root.addView(listLayout)
 
         val scroll = ScrollView(this)
@@ -131,6 +140,7 @@ class MainActivity : AppCompatActivity() {
                     displayStations()
                 }
             }
+
             val viewPointsButton = Button(this).apply {
                 text = "View Points"
                 setOnClickListener {
