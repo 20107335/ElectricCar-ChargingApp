@@ -18,6 +18,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (AppData.currentUser == null) {
+            goToLogin()
+            return
+        }
+
         enableEdgeToEdge()
 
         val scroll = createUserInterface()
@@ -36,11 +42,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun goToLogin() {
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
+    }
+
     private fun createUserInterface(): ScrollView {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 32, 32, 32)
+        }
+
+        val userText = TextView(this).apply {
+            text = "Logged in as ${AppData.currentUser?.name}"
+            textSize = 14f
+            gravity = Gravity.END
+        }
+
+        val logoutButton = Button(this).apply {
+            text = "Log Out"
+            setOnClickListener {
+                AppData.currentUser = null
+                goToLogin()
+            }
         }
 
         val title = TextView(this).apply {
@@ -66,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val sessionsButton = Button(this).apply {
-            text = "My Sessions"
+            text = "My Bookings"
             setOnClickListener {
                 val intent = Intent(this@MainActivity, SessionListActivity::class.java)
                 startActivity(intent)
@@ -77,6 +102,8 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
         }
 
+        root.addView(userText)
+        root.addView(logoutButton)
         root.addView(title)
         root.addView(addButton)
         root.addView(vehiclesButton)

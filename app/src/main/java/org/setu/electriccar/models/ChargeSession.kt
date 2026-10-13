@@ -3,14 +3,9 @@ package org.setu.electriccar.models
 data class ChargeSession(
     var sessionId: Long = 0,
     var startTime: String = "",
-    var endTime: String = "",
-    var energyUsed: Double = 0.0,
-    var cost: Double = 0.0,
     var status: String = "",
-    var chargingPoint: ChargingPoint? = null
-) {
-    fun calculateCost(): Double {
-        val price = chargingPoint?.pricePerKwh ?: 0.0
-        return energyUsed * price
-    }
-}
+    var chargingPoint: ChargingPoint? = null,
+    var userId: Long = 0,
+    var vehicle: Vehicle? = null,
+    var stationName: String = ""
+)

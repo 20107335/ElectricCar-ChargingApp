@@ -2,23 +2,17 @@ package org.setu.electriccar
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.InputType
 import android.view.Gravity
 import android.widget.Button
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import org.setu.electriccar.models.ChargeSession
 import org.setu.electriccar.models.ChargingPoint
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class ChargingPointsActivity : AppCompatActivity() {
 
@@ -118,6 +112,8 @@ class ChargingPointsActivity : AppCompatActivity() {
             return
         }
 
+        val currentUserId = AppData.currentUser?.userId
+
         for (point in points) {
 
             val pointLayout = LinearLayout(this).apply {
@@ -169,76 +165,54 @@ class ChargingPointsActivity : AppCompatActivity() {
             pointLayout.addView(editButton)
             pointLayout.addView(deleteButton)
 
-            // Start / Stop charging
-            val activeSession = AppData.sessions.findActiveForPoint(point)
+            // Booking
+            val booking = AppData.sessions.findBookedForPoint(point)
 
             if (point.status == "Available") {
-                val startButton = Button(this).apply {
-                    text = "Start Charging"
+
+                val bookButton = Button(this).apply {
+                    text = "Book"
                     setOnClickListener {
-                        startCharging(point)
+                        val intent = Intent(this@ChargingPointsActivity, BookingActivity::class.java)
+                        intent.putExtra("stationId", stationId)
+                        intent.putExtra("pointId", point.pointId)
+                        startActivity(intent)
                     }
                 }
-                pointLayout.addView(startButton)
-            } else if (activeSession != null) {
-                val stopButton = Button(this).apply {
-                    text = "Stop Charging"
+                pointLayout.addView(bookButton)
+
+            } else if (booking != null && booking.userId == currentUserId) {
+
+                val bookingText = TextView(this).apply {
+                    text = "Your booking: ${booking.startTime}"
+                    textSize = 14f
+                }
+
+                val cancelButton = Button(this).apply {
+                    text = "Cancel Booking"
                     setOnClickListener {
-                        showStopDialog(point, activeSession)
+                        cancelBooking(point, booking)
                     }
                 }
-                pointLayout.addView(stopButton)
+
+                pointLayout.addView(bookingText)
+                pointLayout.addView(cancelButton)
+
+            } else if (booking != null) {
+
+                pointLayout.addView(TextView(this).apply {
+                    text = "Booked by another user for ${booking.startTime}"
+                    textSize = 14f
+                })
             }
 
             listLayout.addView(pointLayout)
         }
     }
 
-    private fun now(): String {
-        return SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
-    }
-
-    private fun startCharging(point: ChargingPoint) {
-
-        val session = ChargeSession(
-            startTime = now(),
-            status = "Active",
-            chargingPoint = point
-        )
-
-        AppData.sessions.create(session)
-        point.status = "In Use"
-
+    private fun cancelBooking(point: ChargingPoint, booking: ChargeSession) {
+        booking.status = "Cancelled"
+        point.status = "Available"
         displayPoints()
-    }
-
-    private fun showStopDialog(point: ChargingPoint, session: ChargeSession) {
-
-        val input = EditText(this).apply {
-            hint = "Energy used (kWh)"
-            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Stop charging")
-            .setMessage("How many kWh were used?")
-            .setView(input)
-            .setPositiveButton("Stop") { _, _ ->
-                val kwh = input.text.toString().toDoubleOrNull()
-
-                if (kwh == null || kwh < 0) {
-                    return@setPositiveButton
-                }
-
-                session.energyUsed = kwh
-                session.endTime = now()
-                session.cost = session.calculateCost()
-                session.status = "Completed"
-                point.status = "Available"
-
-                displayPoints()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
     }
 }

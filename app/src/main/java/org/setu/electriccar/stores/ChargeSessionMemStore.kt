@@ -27,11 +27,11 @@ class ChargeSessionMemStore : ChargeSessionStore {
 
         if (found != null) {
             found.startTime = session.startTime
-            found.endTime = session.endTime
-            found.energyUsed = session.energyUsed
-            found.cost = session.cost
             found.status = session.status
             found.chargingPoint = session.chargingPoint
+            found.userId = session.userId
+            found.vehicle = session.vehicle
+            found.stationName = session.stationName
             return true
         }
 
@@ -49,9 +49,9 @@ class ChargeSessionMemStore : ChargeSessionStore {
         return false
     }
 
-    override fun findActiveForPoint(point: ChargingPoint): ChargeSession? {
+    override fun findBookedForPoint(point: ChargingPoint): ChargeSession? {
         return sessions.find { session ->
-            session.status == "Active" && session.chargingPoint === point
+            session.status == "Booked" && session.chargingPoint === point
         }
     }
 }

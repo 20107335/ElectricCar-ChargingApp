@@ -1,0 +1,206 @@
+package org.setu.electriccar
+
+import android.os.Bundle
+import android.view.Gravity
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.Spinner
+import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import org.setu.electriccar.models.ChargeSession
+import org.setu.electriccar.models.ChargingPoint
+import org.setu.electriccar.models.ChargingStation
+import org.setu.electriccar.models.Vehicle
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+class BookingActivity : AppCompatActivity() {
+
+    private lateinit var station: ChargingStation
+    private lateinit var point: ChargingPoint
+
+    private lateinit var vehicleSpinner: Spinner
+    private lateinit var dateInput: EditText
+    private lateinit var timeInput: EditText
+    private lateinit var messageText: TextView
+
+    private var vehicles: List<Vehicle> = emptyList()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        val stationId = intent.getLongExtra("stationId", -1L)
+        val pointId = intent.getLongExtra("pointId", -1L)
+
+        val foundStation = AppData.stations.findOne(stationId)
+        val foundPoint = foundStation?.chargingPoints?.find { it.pointId == pointId }
+
+        if (foundStation == null || foundPoint == null) {
+            finish()
+            return
+        }
+
+        station = foundStation
+        point = foundPoint
+
+        val scroll = createUserInterface()
+
+        ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+    }
+
+    private fun createUserInterface(): ScrollView {
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 32, 32, 32)
+        }
+
+        val heading = TextView(this).apply {
+            text = "Book a Charging Point"
+            textSize = 28f
+            gravity = Gravity.CENTER
+        }
+
+        val infoText = TextView(this).apply {
+            text = "${station.name} – Point ${point.pointId}\n" +
+                    "${point.powerOutput} kW – €${point.pricePerKwh}/kWh\n" +
+                    "Connector: ${point.connector?.connectorType ?: "none"}"
+            textSize = 16f
+            setPadding(0, 16, 0, 24)
+        }
+
+        vehicles = AppData.currentUser?.vehicles ?: emptyList()
+
+        val vehicleLabel = TextView(this).apply {
+            text = "Vehicle"
+            textSize = 14f
+        }
+
+        val vehicleNames = vehicles.map { "${it.make} ${it.model} (${it.connectorType})" }
+
+        vehicleSpinner = Spinner(this).apply {
+            adapter = ArrayAdapter(
+                this@BookingActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                vehicleNames
+            )
+        }
+
+        val today = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+
+        dateInput = EditText(this).apply {
+            hint = "Date (dd/MM/yyyy)"
+            setText(today)
+        }
+
+        timeInput = EditText(this).apply {
+            hint = "Time (HH:mm, e.g. 09:30)"
+        }
+
+        messageText = TextView(this).apply {
+            textSize = 14f
+            setPadding(0, 16, 0, 16)
+        }
+
+        val bookButton = Button(this).apply {
+            text = "Confirm Booking"
+            setOnClickListener {
+                confirmBooking()
+            }
+        }
+
+        val cancelButton = Button(this).apply {
+            text = "Cancel"
+            setOnClickListener {
+                finish()
+            }
+        }
+
+        if (vehicles.isEmpty()) {
+            messageText.text = "Add a vehicle in My Vehicles before booking."
+            bookButton.isEnabled = false
+        }
+
+        root.addView(heading)
+        root.addView(infoText)
+        root.addView(vehicleLabel)
+        root.addView(vehicleSpinner)
+        root.addView(dateInput)
+        root.addView(timeInput)
+        root.addView(messageText)
+        root.addView(bookButton)
+        root.addView(cancelButton)
+
+        val scroll = ScrollView(this)
+        scroll.addView(root)
+        setContentView(scroll)
+
+        return scroll
+    }
+
+    private fun confirmBooking() {
+
+        val vehicle = vehicles[vehicleSpinner.selectedItemPosition]
+
+        val date = dateInput.text.toString().trim()
+        val time = timeInput.text.toString().trim()
+
+        val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        format.isLenient = false
+
+        val bookedDate = try {
+            format.parse("$date $time")
+        } catch (e: ParseException) {
+            null
+        }
+
+        if (bookedDate == null) {
+            messageText.text = "Enter the date as dd/MM/yyyy and the time as HH:mm."
+            return
+        }
+
+        if (bookedDate.before(Date())) {
+            messageText.text = "Pick a time in the future."
+            return
+        }
+
+        val pointConnector = point.connector?.connectorType ?: ""
+        if (!pointConnector.equals(vehicle.connectorType, ignoreCase = true)) {
+            messageText.text = "This point uses $pointConnector but your " +
+                    "${vehicle.make} ${vehicle.model} uses ${vehicle.connectorType}."
+            return
+        }
+
+        if (point.status != "Available") {
+            messageText.text = "This point is no longer available."
+            return
+        }
+
+        val booking = ChargeSession(
+            startTime = format.format(bookedDate),
+            status = "Booked",
+            chargingPoint = point,
+            userId = AppData.currentUser?.userId ?: 0,
+            vehicle = vehicle,
+            stationName = station.name
+        )
+
+        AppData.sessions.create(booking)
+        point.status = "Booked"
+
+        finish()
+    }
+}
