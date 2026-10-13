@@ -85,7 +85,7 @@ class VehicleListActivity : AppCompatActivity() {
 
         listLayout.removeAllViews()
 
-        val vehicles = AppData.vehicles.findAll()
+        val vehicles = AppData.currentUser?.vehicles ?: ArrayList()
 
         if (vehicles.isEmpty()) {
             listLayout.addView(TextView(this).apply {
@@ -131,6 +131,7 @@ class VehicleListActivity : AppCompatActivity() {
                 text = "Delete"
                 setOnClickListener {
                     AppData.vehicles.delete(vehicle.vehicleId)
+                    AppData.currentUser?.vehicles?.removeAll { it.vehicleId == vehicle.vehicleId }
                     displayVehicles()
                 }
             }

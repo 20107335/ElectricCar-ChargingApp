@@ -96,6 +96,7 @@ class AddEditVehicleActivity : AppCompatActivity() {
 
         if (editingId == -1L) {
             AppData.vehicles.create(vehicle)
+            AppData.currentUser?.vehicles?.add(vehicle)
         } else {
             vehicle.vehicleId = editingId
             AppData.vehicles.update(vehicle)

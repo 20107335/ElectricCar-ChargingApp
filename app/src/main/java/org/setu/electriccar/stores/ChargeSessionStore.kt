@@ -9,5 +9,5 @@ interface ChargeSessionStore {
     fun create(session: ChargeSession)
     fun update(session: ChargeSession): Boolean
     fun delete(id: Long): Boolean
-    fun findActiveForPoint(point: ChargingPoint): ChargeSession?
+    fun findBookedForPoint(point: ChargingPoint): ChargeSession?
 }

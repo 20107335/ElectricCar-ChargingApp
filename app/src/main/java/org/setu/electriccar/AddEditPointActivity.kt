@@ -20,7 +20,7 @@ import org.setu.electriccar.models.Connector
 
 class AddEditPointActivity : AppCompatActivity() {
 
-    private val statuses = arrayOf("Available", "In Use", "Out of Order")
+    private val statuses = arrayOf("Available", "Out of Order")
 
     private lateinit var statusSpinner: Spinner
     private lateinit var powerInput: EditText
@@ -212,7 +212,9 @@ class AddEditPointActivity : AppCompatActivity() {
             val point = station.chargingPoints.find { it.pointId == editingPointId }
 
             if (point != null) {
-                point.status = status
+                if (point.status != "Booked") {
+                    point.status = status
+                }
                 point.powerOutput = power
                 point.pricePerKwh = price
                 point.connector = Connector(

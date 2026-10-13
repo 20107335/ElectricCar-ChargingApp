@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 
 class SessionListActivity : AppCompatActivity() {
 
-    private lateinit var totalText: TextView
+    private lateinit var summaryText: TextView
     private lateinit var listLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +32,7 @@ class SessionListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (::listLayout.isInitialized) {
-            displaySessions()
+            displayBookings()
         }
     }
 
@@ -44,12 +44,12 @@ class SessionListActivity : AppCompatActivity() {
         }
 
         val title = TextView(this).apply {
-            text = "My Sessions"
+            text = "My Bookings"
             textSize = 28f
             gravity = Gravity.CENTER
         }
 
-        totalText = TextView(this).apply {
+        summaryText = TextView(this).apply {
             textSize = 18f
             gravity = Gravity.CENTER
             setPadding(0, 16, 0, 16)
@@ -67,7 +67,7 @@ class SessionListActivity : AppCompatActivity() {
         }
 
         root.addView(title)
-        root.addView(totalText)
+        root.addView(summaryText)
         root.addView(backButton)
         root.addView(listLayout)
 
@@ -75,92 +75,98 @@ class SessionListActivity : AppCompatActivity() {
         scroll.addView(root)
         setContentView(scroll)
 
-        displaySessions()
+        displayBookings()
         return scroll
     }
 
-    private fun displaySessions() {
+    private fun displayBookings() {
 
         listLayout.removeAllViews()
 
-        val sessions = AppData.sessions.findAll()
+        val bookings = AppData.sessions.findAll()
+            .filter { it.userId == AppData.currentUser?.userId }
+            .sortedBy { if (it.status == "Booked") 0 else 1 }
 
-        val totalCost = sessions
-            .filter { it.status == "Completed" }
-            .sumOf { it.cost }
+        val upcoming = bookings.count { it.status == "Booked" }
+        summaryText.text = "Upcoming bookings: $upcoming"
 
-        val totalEnergy = sessions
-            .filter { it.status == "Completed" }
-            .sumOf { it.energyUsed }
-
-        totalText.text = "Total: %.1f kWh – €%.2f".format(totalEnergy, totalCost)
-
-        if (sessions.isEmpty()) {
+        if (bookings.isEmpty()) {
             listLayout.addView(TextView(this).apply {
-                text = "No charging sessions yet."
+                text = "No bookings yet."
                 textSize = 18f
                 setPadding(0, 40, 0, 40)
             })
             return
         }
 
-        for (session in sessions.reversed()) {
+        for (booking in bookings) {
 
-            val sessionLayout = LinearLayout(this).apply {
+            val bookingLayout = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(0, 20, 0, 20)
             }
 
-            val sessionTitle = TextView(this).apply {
-                text = "Session ${session.sessionId} – ${session.status}"
+            val bookingTitle = TextView(this).apply {
+                text = "Booking ${booking.sessionId} – ${booking.status}"
                 textSize = 20f
             }
 
-            val pointText = TextView(this).apply {
-                val point = session.chargingPoint
+            val placeText = TextView(this).apply {
+                val point = booking.chargingPoint
                 text = if (point != null) {
-                    "Point ${point.pointId} – €${point.pricePerKwh}/kWh"
+                    "${booking.stationName} – Point ${point.pointId} – €${point.pricePerKwh}/kWh"
                 } else {
-                    "Point: unknown"
+                    booking.stationName
+                }
+                textSize = 14f
+            }
+
+            val vehicleText = TextView(this).apply {
+                val vehicle = booking.vehicle
+                text = if (vehicle != null) {
+                    "Vehicle: ${vehicle.make} ${vehicle.model}"
+                } else {
+                    ""
                 }
                 textSize = 14f
             }
 
             val timeText = TextView(this).apply {
-                text = if (session.status == "Completed") {
-                    "${session.startTime} → ${session.endTime}"
+                text = if (booking.status == "Booked") {
+                    "Booked for ${booking.startTime}"
                 } else {
-                    "Started ${session.startTime}"
-                }
-                textSize = 14f
-            }
-
-            val costText = TextView(this).apply {
-                text = if (session.status == "Completed") {
-                    "%.1f kWh – €%.2f".format(session.energyUsed, session.cost)
-                } else {
-                    "Charging in progress…"
+                    "Was booked for ${booking.startTime}"
                 }
                 textSize = 16f
             }
 
-            sessionLayout.addView(sessionTitle)
-            sessionLayout.addView(pointText)
-            sessionLayout.addView(timeText)
-            sessionLayout.addView(costText)
+            bookingLayout.addView(bookingTitle)
+            bookingLayout.addView(placeText)
+            bookingLayout.addView(vehicleText)
+            bookingLayout.addView(timeText)
 
-            if (session.status == "Completed") {
+            if (booking.status == "Booked") {
+                val cancelButton = Button(this).apply {
+                    text = "Cancel Booking"
+                    setOnClickListener {
+                        booking.status = "Cancelled"
+                        booking.chargingPoint?.status = "Available"
+                        displayBookings()
+                    }
+                }
+                bookingLayout.addView(cancelButton)
+            } else {
                 val deleteButton = Button(this).apply {
                     text = "Delete"
                     setOnClickListener {
-                        AppData.sessions.delete(session.sessionId)
-                        displaySessions()
+                        AppData.sessions.delete(booking.sessionId)
+                        displayBookings()
                     }
                 }
-                sessionLayout.addView(deleteButton)
+                bookingLayout.addView(deleteButton)
             }
 
-            listLayout.addView(sessionLayout)
+            listLayout.addView(bookingLayout)
         }
     }
 }
