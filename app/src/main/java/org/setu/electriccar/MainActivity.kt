@@ -65,6 +65,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val sessionsButton = Button(this).apply {
+            text = "My Sessions"
+            setOnClickListener {
+                val intent = Intent(this@MainActivity, SessionListActivity::class.java)
+                startActivity(intent)
+            }
+        }
+
         listLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
@@ -72,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         root.addView(title)
         root.addView(addButton)
         root.addView(vehiclesButton)
+        root.addView(sessionsButton)
         root.addView(listLayout)
 
         val scroll = ScrollView(this)

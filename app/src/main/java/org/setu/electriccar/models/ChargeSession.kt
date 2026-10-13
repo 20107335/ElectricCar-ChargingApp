@@ -8,4 +8,9 @@ data class ChargeSession(
     var cost: Double = 0.0,
     var status: String = "",
     var chargingPoint: ChargingPoint? = null
-)
+) {
+    fun calculateCost(): Double {
+        val price = chargingPoint?.pricePerKwh ?: 0.0
+        return energyUsed * price
+    }
+}
