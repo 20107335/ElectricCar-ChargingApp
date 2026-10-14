@@ -28,11 +28,6 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".AddEditStationActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
             android:name=".ChargingPointsActivity"
             android:exported="false" />
 
@@ -57,7 +52,12 @@
             android:name=".BookingActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
+        <activity
+            android:name=".RouteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StationListActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,8 +12,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var listLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,38 +23,44 @@ class MainActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
 
-        val scroll = createUserInterface()
-
-        ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (::listLayout.isInitialized) {
-            displayStations()
-        }
-    }
-
-    private fun goToLogin() {
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
-    }
-
-    private fun createUserInterface(): ScrollView {
-
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(32, 32, 32, 32)
+            gravity = Gravity.CENTER
+            setPadding(48, 48, 48, 48)
         }
 
-        val userText = TextView(this).apply {
-            text = "Logged in as ${AppData.currentUser?.name}"
-            textSize = 14f
-            gravity = Gravity.END
+        val title = TextView(this).apply {
+            text = "EV Charging"
+            textSize = 32f
+            gravity = Gravity.CENTER
+        }
+
+        val welcome = TextView(this).apply {
+            text = "Welcome, ${AppData.currentUser?.name}"
+            textSize = 18f
+            gravity = Gravity.CENTER
+            setPadding(0, 8, 0, 48)
+        }
+
+        val stationsButton = Button(this).apply {
+            text = "View Stations"
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, StationListActivity::class.java))
+            }
+        }
+
+        val vehiclesButton = Button(this).apply {
+            text = "My Vehicles"
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, VehicleListActivity::class.java))
+            }
+        }
+
+        val bookingsButton = Button(this).apply {
+            text = "My Bookings"
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, SessionListActivity::class.java))
+            }
         }
 
         val logoutButton = Button(this).apply {
@@ -68,132 +71,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val title = TextView(this).apply {
-            text = "Charging Stations"
-            textSize = 28f
-            gravity = Gravity.CENTER
+        val buttonParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(0, 12, 0, 12)
         }
 
-        val addButton = Button(this).apply {
-            text = "Add Station"
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, AddEditStationActivity::class.java)
-                startActivity(intent)
-            }
-        }
-
-        val vehiclesButton = Button(this).apply {
-            text = "My Vehicles"
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, VehicleListActivity::class.java)
-                startActivity(intent)
-            }
-        }
-
-        val sessionsButton = Button(this).apply {
-            text = "My Bookings"
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, SessionListActivity::class.java)
-                startActivity(intent)
-            }
-        }
-
-        listLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
-
-        root.addView(userText)
-        root.addView(logoutButton)
         root.addView(title)
-        root.addView(addButton)
-        root.addView(vehiclesButton)
-        root.addView(sessionsButton)
-        root.addView(listLayout)
+        root.addView(welcome)
+        root.addView(stationsButton, buttonParams)
+        root.addView(vehiclesButton, buttonParams)
+        root.addView(bookingsButton, buttonParams)
+        root.addView(logoutButton, buttonParams)
 
-        val scroll = ScrollView(this)
-        scroll.addView(root)
-        setContentView(scroll)
+        setContentView(root)
 
-        displayStations()
-        return scroll
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(
+                systemBars.left + 48,
+                systemBars.top + 48,
+                systemBars.right + 48,
+                systemBars.bottom + 48
+            )
+            insets
+        }
     }
 
-    private fun displayStations() {
-
-        listLayout.removeAllViews()
-
-        val stations = AppData.stations.findAll()
-
-        if (stations.isEmpty()) {
-            listLayout.addView(TextView(this).apply {
-                text = "No charging stations yet."
-                textSize = 18f
-                setPadding(0, 40, 0, 40)
-            })
-            return
-        }
-
-        for (station in stations) {
-
-            val stationLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(0, 20, 0, 20)
-            }
-
-            val stationName = TextView(this).apply {
-                text = "${station.stationId}: ${station.name}"
-                textSize = 20f
-            }
-
-            val stationAddress = TextView(this).apply {
-                text = station.address
-                textSize = 16f
-            }
-
-            val stationHours = TextView(this).apply {
-                text = "Open: ${station.openingHours}"
-                textSize = 14f
-            }
-
-            val stationPoints = TextView(this).apply {
-                text = "Charging points: ${station.chargingPoints.size}"
-                textSize = 14f
-            }
-
-            val editButton = Button(this).apply {
-                text = "Edit"
-                setOnClickListener {
-                    val intent = Intent(this@MainActivity, AddEditStationActivity::class.java)
-                    intent.putExtra("id", station.stationId)
-                    startActivity(intent)
-                }
-            }
-
-            val deleteButton = Button(this).apply {
-                text = "Delete"
-                setOnClickListener {
-                    AppData.stations.delete(station.stationId)
-                    displayStations()
-                }
-            }
-
-            val viewPointsButton = Button(this).apply {
-                text = "View Points"
-                setOnClickListener {
-                    val intent = Intent(this@MainActivity, ChargingPointsActivity::class.java)
-                    intent.putExtra("stationId", station.stationId)
-                    startActivity(intent)
-                }
-            }
-
-            stationLayout.addView(stationName)
-            stationLayout.addView(stationAddress)
-            stationLayout.addView(stationHours)
-            stationLayout.addView(stationPoints)
-            stationLayout.addView(editButton)
-            stationLayout.addView(deleteButton)
-            stationLayout.addView(viewPointsButton)
-            listLayout.addView(stationLayout)
-        }
+    private fun goToLogin() {
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
     }
 }
