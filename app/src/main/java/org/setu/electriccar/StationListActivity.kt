@@ -18,6 +18,8 @@ class StationListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         enableEdgeToEdge()
 
         val root = LinearLayout(this).apply {
@@ -32,17 +34,12 @@ class StationListActivity : AppCompatActivity() {
             setPadding(0, 0, 0, 16)
         }
 
-        val backButton = Button(this).apply {
-            text = "Back"
-            setOnClickListener { finish() }
-        }
 
         listLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
 
         root.addView(title)
-        root.addView(backButton)
         root.addView(listLayout)
 
         val scroll = ScrollView(this)

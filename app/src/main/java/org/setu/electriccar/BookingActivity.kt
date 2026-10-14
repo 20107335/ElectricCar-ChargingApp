@@ -36,6 +36,7 @@ class BookingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         enableEdgeToEdge()
 
         val stationId = intent.getLongExtra("stationId", -1L)

@@ -23,6 +23,8 @@ class RouteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
 
         val stationId = intent.getLongExtra("stationId", -1L)
         stationName = AppData.stations.findOne(stationId)?.name ?: "Station"
@@ -51,10 +53,6 @@ class RouteActivity : AppCompatActivity() {
             setOnClickListener { calculateRoute() }
         }
 
-        val backButton = Button(this).apply {
-            text = "Back"
-            setOnClickListener { finish() }
-        }
 
         resultText = TextView(this).apply {
             textSize = 18f
@@ -65,7 +63,6 @@ class RouteActivity : AppCompatActivity() {
         root.addView(startInput)
         root.addView(distanceInput)
         root.addView(calculateButton)
-        root.addView(backButton)
         root.addView(resultText)
 
         setContentView(root)

@@ -25,39 +25,55 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".StationListActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".ChargingPointsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:parentActivityName=".StationListActivity" />
 
         <activity
             android:name=".AddEditPointActivity"
             android:exported="false"
+            android:parentActivityName=".ChargingPointsActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".BookingActivity"
+            android:exported="false"
+            android:parentActivityName=".ChargingPointsActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".RouteActivity"
+            android:exported="false"
+            android:parentActivityName=".StationListActivity" />
+
+        <activity
             android:name=".VehicleListActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity" />
 
         <activity
             android:name=".AddEditVehicleActivity"
             android:exported="false"
+            android:parentActivityName=".VehicleListActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".SessionListActivity"
-            android:exported="false" />
-        <activity
-            android:name=".BookingActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".RouteActivity"
-            android:exported="false" />
-        <activity
-            android:name=".StationListActivity"
-            android:exported="false" />
+            android:parentActivityName=".MainActivity" />
+
     </application>
 
 </manifest>
