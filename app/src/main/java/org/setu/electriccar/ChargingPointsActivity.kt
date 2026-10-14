@@ -23,6 +23,7 @@ class ChargingPointsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         enableEdgeToEdge()
 
         stationId = intent.getLongExtra("stationId", -1L)
@@ -69,12 +70,6 @@ class ChargingPointsActivity : AppCompatActivity() {
             }
         }
 
-        val backButton = Button(this).apply {
-            text = "Back to Stations"
-            setOnClickListener {
-                finish()
-            }
-        }
 
         listLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -82,7 +77,6 @@ class ChargingPointsActivity : AppCompatActivity() {
 
         root.addView(titleText)
         root.addView(addButton)
-        root.addView(backButton)
         root.addView(listLayout)
 
         val scroll = ScrollView(this)

@@ -18,6 +18,8 @@ class SessionListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         enableEdgeToEdge()
 
         val scroll = createUserInterface()
@@ -55,12 +57,6 @@ class SessionListActivity : AppCompatActivity() {
             setPadding(0, 16, 0, 16)
         }
 
-        val backButton = Button(this).apply {
-            text = "Back to Stations"
-            setOnClickListener {
-                finish()
-            }
-        }
 
         listLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -68,7 +64,6 @@ class SessionListActivity : AppCompatActivity() {
 
         root.addView(title)
         root.addView(summaryText)
-        root.addView(backButton)
         root.addView(listLayout)
 
         val scroll = ScrollView(this)
