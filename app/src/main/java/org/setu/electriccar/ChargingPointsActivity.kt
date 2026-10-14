@@ -209,10 +209,10 @@ class ChargingPointsActivity : AppCompatActivity() {
             listLayout.addView(pointLayout)
         }
     }
-
     private fun cancelBooking(point: ChargingPoint, booking: ChargeSession) {
         booking.status = "Cancelled"
         point.status = "Available"
+        AppData.sessions.save()
         displayPoints()
     }
 }

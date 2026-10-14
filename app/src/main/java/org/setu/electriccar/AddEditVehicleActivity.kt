@@ -19,20 +19,9 @@ class AddEditVehicleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        createUserInterface()
-
-        editingId = intent.getLongExtra("id", -1L)
-
-        if (editingId != -1L) {
-            loadVehicle(editingId)
-        }
-    }
-
-    private fun createUserInterface() {
-
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(32, 160, 32, 32)
+            setPadding(48, 160, 48, 48)
         }
 
         makeInput = EditText(this).apply { hint = "Make" }
@@ -56,22 +45,23 @@ class AddEditVehicleActivity : AppCompatActivity() {
         root.addView(connectorInput)
         root.addView(saveButton)
         root.addView(cancelButton)
-
         setContentView(root)
+
+        editingId = intent.getLongExtra("id", -1L)
+        val vehicle = myVehicles().find { it.vehicleId == editingId }
+        if (vehicle != null) {
+            makeInput.setText(vehicle.make)
+            modelInput.setText(vehicle.model)
+            batteryInput.setText(vehicle.batteryCapacity.toString())
+            connectorInput.setText(vehicle.connectorType)
+        }
     }
 
-    private fun loadVehicle(id: Long) {
-
-        val vehicle = AppData.vehicles.findOne(id) ?: return
-
-        makeInput.setText(vehicle.make)
-        modelInput.setText(vehicle.model)
-        batteryInput.setText(vehicle.batteryCapacity.toString())
-        connectorInput.setText(vehicle.connectorType)
+    private fun myVehicles(): ArrayList<Vehicle> {
+        return AppData.currentUser?.vehicles ?: ArrayList()
     }
 
     private fun saveVehicle() {
-
         val make = makeInput.text.toString().trim()
         val model = modelInput.text.toString().trim()
         val connector = connectorInput.text.toString().trim()
@@ -87,21 +77,19 @@ class AddEditVehicleActivity : AppCompatActivity() {
             return
         }
 
-        val vehicle = Vehicle(
-            make = make,
-            model = model,
-            batteryCapacity = battery,
-            connectorType = connector
-        )
+        val vehicle = myVehicles().find { it.vehicleId == editingId }
 
-        if (editingId == -1L) {
-            AppData.vehicles.create(vehicle)
-            AppData.currentUser?.vehicles?.add(vehicle)
+        if (vehicle == null) {
+            val newId = (myVehicles().maxOfOrNull { it.vehicleId } ?: 0L) + 1
+            myVehicles().add(Vehicle(newId, make, model, battery, connector))
         } else {
-            vehicle.vehicleId = editingId
-            AppData.vehicles.update(vehicle)
+            vehicle.make = make
+            vehicle.model = model
+            vehicle.batteryCapacity = battery
+            vehicle.connectorType = connector
         }
 
+        AppData.saveCurrentUser()
         finish()
     }
 }

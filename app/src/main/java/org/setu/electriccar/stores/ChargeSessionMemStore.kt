@@ -1,57 +1,57 @@
 package org.setu.electriccar.stores
 
+import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.setu.electriccar.models.ChargeSession
 import org.setu.electriccar.models.ChargingPoint
-import java.util.concurrent.atomic.AtomicLong
+import java.io.File
 
-class ChargeSessionMemStore : ChargeSessionStore {
+class ChargeSessionMemStore(context: Context) {
 
-    private val sessions = ArrayList<ChargeSession>()
-    private val lastId = AtomicLong()
+    private val file = File(context.filesDir, "sessions.json")
+    private var sessions = ArrayList<ChargeSession>()
 
-    override fun findAll(): List<ChargeSession> {
+    init {
+        if (file.exists()) {
+            val type = object : TypeToken<ArrayList<ChargeSession>>() {}.type
+            sessions = Gson().fromJson(file.readText(), type)
+        }
+    }
+
+    fun save() {
+        file.writeText(Gson().toJson(sessions))
+    }
+
+    fun findAll(): List<ChargeSession> {
         return sessions
     }
 
-    override fun findOne(id: Long): ChargeSession? {
-        return sessions.find { session -> session.sessionId == id }
-    }
-
-    override fun create(session: ChargeSession) {
-        session.sessionId = lastId.incrementAndGet()
+    fun create(session: ChargeSession) {
+        session.sessionId = (sessions.maxOfOrNull { it.sessionId } ?: 0L) + 1
         sessions.add(session)
+        save()
     }
 
-    override fun update(session: ChargeSession): Boolean {
-        val found = findOne(session.sessionId)
-
-        if (found != null) {
-            found.startTime = session.startTime
-            found.status = session.status
-            found.chargingPoint = session.chargingPoint
-            found.userId = session.userId
-            found.vehicle = session.vehicle
-            found.stationName = session.stationName
-            return true
-        }
-
-        return false
+    fun delete(id: Long) {
+        sessions.removeAll { it.sessionId == id }
+        save()
     }
 
-    override fun delete(id: Long): Boolean {
-        val found = findOne(id)
-
-        if (found != null) {
-            sessions.remove(found)
-            return true
-        }
-
-        return false
+    fun findBookedForPoint(point: ChargingPoint): ChargeSession? {
+        return sessions.find { it.status == "Booked" && it.chargingPoint === point }
     }
 
-    override fun findBookedForPoint(point: ChargingPoint): ChargeSession? {
-        return sessions.find { session ->
-            session.status == "Booked" && session.chargingPoint === point
+    fun relink(stations: ChargingStationMemStore) {
+        for (session in sessions) {
+            val station = stations.findAll().find { it.name == session.stationName } ?: continue
+            val point = station.chargingPoints.find { it.pointId == session.chargingPoint?.pointId } ?: continue
+
+            session.chargingPoint = point
+
+            if (session.status == "Booked") {
+                point.status = "Booked"
+            }
         }
     }
 }
