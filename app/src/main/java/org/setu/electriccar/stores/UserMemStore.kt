@@ -1,51 +1,38 @@
 package org.setu.electriccar.stores
 
+import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.setu.electriccar.models.User
-import java.util.concurrent.atomic.AtomicLong
+import java.io.File
 
-class UserMemStore : UserStore {
+class UserMemStore(context: Context) {
 
-    private val users = ArrayList<User>()
-    private val lastId = AtomicLong()
+    private val file = File(context.filesDir, "users.json")
+    private var users = ArrayList<User>()
 
-    override fun findAll(): List<User> {
+    init {
+        if (file.exists()) {
+            val type = object : TypeToken<ArrayList<User>>() {}.type
+            users = Gson().fromJson(file.readText(), type)
+        }
+    }
+
+    fun save() {
+        file.writeText(Gson().toJson(users))
+    }
+
+    fun findAll(): List<User> {
         return users
     }
 
-    override fun findOne(id: Long): User? {
-        return users.find { user -> user.userId == id }
+    fun findByEmail(email: String): User? {
+        return users.find { it.email.equals(email, ignoreCase = true) }
     }
 
-    override fun findByEmail(email: String): User? {
-        return users.find { user -> user.email.equals(email, ignoreCase = true) }
-    }
-
-    override fun create(user: User) {
-        user.userId = lastId.incrementAndGet()
+    fun create(user: User) {
+        user.userId = (users.maxOfOrNull { it.userId } ?: 0L) + 1
         users.add(user)
-    }
-
-    override fun update(user: User): Boolean {
-        val found = findOne(user.userId)
-
-        if (found != null) {
-            found.name = user.name
-            found.email = user.email
-            found.password = user.password
-            return true
-        }
-
-        return false
-    }
-
-    override fun delete(id: Long): Boolean {
-        val found = findOne(id)
-
-        if (found != null) {
-            users.remove(found)
-            return true
-        }
-
-        return false
+        save()
     }
 }

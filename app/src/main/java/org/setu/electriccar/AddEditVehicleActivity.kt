@@ -102,7 +102,7 @@ class AddEditVehicleActivity : AppCompatActivity() {
                 vehicle.connectorType = connector
             }
         }
-
+        AppData.saveCurrentUser()
         finish()
     }
 }

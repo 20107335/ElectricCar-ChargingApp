@@ -3,15 +3,13 @@ package org.setu.electriccar
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppData.setup(applicationContext)
 
         if (AppData.currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
@@ -19,33 +17,22 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
-        val viewStationsButton = findViewById<Button>(R.id.viewStationsButton)
-        val viewVehiclesButton = findViewById<Button>(R.id.viewVehiclesButton)
-        val myBookingsButton = findViewById<Button>(R.id.myBookingsButton)
-        val logoutButton = findViewById<Button>(R.id.logoutButton)
-
-        viewStationsButton.setOnClickListener {
+        findViewById<Button>(R.id.viewStationsButton).setOnClickListener {
             startActivity(Intent(this, StationListActivity::class.java))
         }
 
-        viewVehiclesButton.setOnClickListener {
+        findViewById<Button>(R.id.viewVehiclesButton).setOnClickListener {
             startActivity(Intent(this, VehicleListActivity::class.java))
         }
 
-        myBookingsButton.setOnClickListener {
+        findViewById<Button>(R.id.myBookingsButton).setOnClickListener {
             startActivity(Intent(this, SessionListActivity::class.java))
         }
 
-        logoutButton.setOnClickListener {
-            AppData.currentUser = null
+        findViewById<Button>(R.id.logoutButton).setOnClickListener {
+            AppData.logout()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }

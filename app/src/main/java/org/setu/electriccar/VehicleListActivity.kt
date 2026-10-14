@@ -84,6 +84,7 @@ class VehicleListActivity : AppCompatActivity() {
     private fun displayVehicles() {
 
         listLayout.removeAllViews()
+        AppData.saveCurrentUser()
 
         val vehicles = AppData.currentUser?.vehicles ?: ArrayList()
 
@@ -130,8 +131,8 @@ class VehicleListActivity : AppCompatActivity() {
             val deleteButton = Button(this).apply {
                 text = "Delete"
                 setOnClickListener {
-                    AppData.vehicles.delete(vehicle.vehicleId)
                     AppData.currentUser?.vehicles?.removeAll { it.vehicleId == vehicle.vehicleId }
+                    AppData.saveCurrentUser()
                     displayVehicles()
                 }
             }

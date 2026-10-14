@@ -151,6 +151,7 @@ class SessionListActivity : AppCompatActivity() {
                     setOnClickListener {
                         booking.status = "Cancelled"
                         booking.chargingPoint?.status = "Available"
+                        AppData.sessions.save()
                         displayBookings()
                     }
                 }
