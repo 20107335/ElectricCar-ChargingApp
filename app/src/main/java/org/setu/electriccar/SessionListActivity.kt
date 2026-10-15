@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.button.MaterialButton
 
 class SessionListActivity : AppCompatActivity() {
 
@@ -141,7 +142,7 @@ class SessionListActivity : AppCompatActivity() {
             bookingLayout.addView(timeText)
 
             if (booking.status == "Booked") {
-                val cancelButton = Button(this).apply {
+                val cancelButton = MaterialButton(this).apply {
                     text = "Cancel Booking"
                     setOnClickListener {
                         booking.status = "Cancelled"
@@ -152,7 +153,7 @@ class SessionListActivity : AppCompatActivity() {
                 }
                 bookingLayout.addView(cancelButton)
             } else {
-                val deleteButton = Button(this).apply {
+                val deleteButton = MaterialButton(this).apply {
                     text = "Delete"
                     setOnClickListener {
                         AppData.sessions.delete(booking.sessionId)

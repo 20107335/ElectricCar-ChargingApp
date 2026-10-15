@@ -13,6 +13,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import org.setu.electriccar.models.ChargeSession
 import org.setu.electriccar.models.ChargingPoint
+import com.google.android.material.button.MaterialButton
+
 
 class ChargingPointsActivity : AppCompatActivity() {
 
@@ -61,7 +63,7 @@ class ChargingPointsActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
         }
 
-        val addButton = Button(this).apply {
+        val addButton = MaterialButton(this).apply {
             text = "Add Point"
             setOnClickListener {
                 val intent = Intent(this@ChargingPointsActivity, AddEditPointActivity::class.java)
@@ -135,7 +137,7 @@ class ChargingPointsActivity : AppCompatActivity() {
                 textSize = 14f
             }
 
-            val editButton = Button(this).apply {
+            val editButton = MaterialButton(this).apply {
                 text = "Edit"
                 setOnClickListener {
                     val intent = Intent(this@ChargingPointsActivity, AddEditPointActivity::class.java)
@@ -145,7 +147,7 @@ class ChargingPointsActivity : AppCompatActivity() {
                 }
             }
 
-            val deleteButton = Button(this).apply {
+            val deleteButton = MaterialButton(this).apply {
                 text = "Delete"
                 setOnClickListener {
                     station.chargingPoints.removeAll { it.pointId == point.pointId }
@@ -164,7 +166,7 @@ class ChargingPointsActivity : AppCompatActivity() {
 
             if (point.status == "Available") {
 
-                val bookButton = Button(this).apply {
+                val bookButton = MaterialButton(this).apply {
                     text = "Book"
                     setOnClickListener {
                         val intent = Intent(this@ChargingPointsActivity, BookingActivity::class.java)
@@ -182,7 +184,7 @@ class ChargingPointsActivity : AppCompatActivity() {
                     textSize = 14f
                 }
 
-                val cancelButton = Button(this).apply {
+                val cancelButton = MaterialButton(this).apply {
                     text = "Cancel Booking"
                     setOnClickListener {
                         cancelBooking(point, booking)

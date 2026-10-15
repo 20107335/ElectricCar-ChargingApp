@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import org.setu.electriccar.models.ChargingPoint
 import org.setu.electriccar.models.ChargingStation
 import org.setu.electriccar.models.Connector
+import com.google.android.material.button.MaterialButton
 
 class AddEditPointActivity : AppCompatActivity() {
 
@@ -108,14 +109,14 @@ class AddEditPointActivity : AppCompatActivity() {
             inputType = InputType.TYPE_CLASS_NUMBER
         }
 
-        val saveButton = Button(this).apply {
+        val saveButton = MaterialButton(this).apply {
             text = "Save"
             setOnClickListener {
                 savePoint()
             }
         }
 
-        val cancelButton = Button(this).apply {
+        val cancelButton = MaterialButton(this).apply {
             text = "Cancel"
             setOnClickListener {
                 finish()
