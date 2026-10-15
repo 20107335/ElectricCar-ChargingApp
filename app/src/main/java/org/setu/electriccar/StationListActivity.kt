@@ -13,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.button.MaterialButton
 
 class StationListActivity : AppCompatActivity() {
 
@@ -52,7 +53,7 @@ class StationListActivity : AppCompatActivity() {
         connectorSpinner = Spinner(this)
         connectorSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, connectorTypes)
 
-        val filterButton = Button(this).apply {
+        val filterButton = MaterialButton(this).apply {
             text = "Filter"
             setOnClickListener {
                 displayStations()
@@ -139,7 +140,7 @@ class StationListActivity : AppCompatActivity() {
                 1f
             )
 
-            val viewPointsButton = Button(this).apply {
+            val viewPointsButton = MaterialButton(this).apply {
                 text = "View Points"
                 setOnClickListener {
                     val intent = Intent(this@StationListActivity, ChargingPointsActivity::class.java)
@@ -148,7 +149,7 @@ class StationListActivity : AppCompatActivity() {
                 }
             }
 
-            val routeButton = Button(this).apply {
+            val routeButton = MaterialButton(this).apply {
                 text = "Route Here"
                 setOnClickListener {
                     val intent = Intent(this@StationListActivity, RouteActivity::class.java)

@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.google.android.material.button.MaterialButton
 
 class BookingActivity : AppCompatActivity() {
 
@@ -129,14 +130,14 @@ class BookingActivity : AppCompatActivity() {
             setPadding(0, 16, 0, 16)
         }
 
-        val bookButton = Button(this).apply {
+        val bookButton = MaterialButton(this).apply {
             text = "Confirm Booking"
             setOnClickListener {
                 confirmBooking()
             }
         }
 
-        val cancelButton = Button(this).apply {
+        val cancelButton = MaterialButton(this).apply {
             text = "Cancel"
             setOnClickListener {
                 finish()

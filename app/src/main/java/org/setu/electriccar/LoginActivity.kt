@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.setu.electriccar.models.User
+import com.google.android.material.button.MaterialButton
 
 class LoginActivity : AppCompatActivity() {
 
@@ -45,12 +46,12 @@ class LoginActivity : AppCompatActivity() {
 
         messageText = TextView(this)
 
-        val loginButton = Button(this).apply {
+        val loginButton = MaterialButton(this).apply {
             text = "Log In"
             setOnClickListener { login() }
         }
 
-        val registerButton = Button(this).apply {
+        val registerButton = MaterialButton(this).apply {
             text = "Register"
             setOnClickListener { register() }
         }

@@ -8,6 +8,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.setu.electriccar.models.Route
+import com.google.android.material.button.MaterialButton
 
 class RouteActivity : AppCompatActivity() {
 
@@ -48,7 +49,7 @@ class RouteActivity : AppCompatActivity() {
             inputType = InputType.TYPE_CLASS_NUMBER
         }
 
-        val calculateButton = Button(this).apply {
+        val calculateButton = MaterialButton(this).apply {
             text = "Calculate Route"
             setOnClickListener { calculateRoute() }
         }
