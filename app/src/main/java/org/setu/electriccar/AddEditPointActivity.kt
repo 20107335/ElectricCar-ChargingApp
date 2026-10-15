@@ -3,21 +3,19 @@ package org.setu.electriccar
 import android.os.Bundle
 import android.text.InputType
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.button.MaterialButton
 import org.setu.electriccar.models.ChargingPoint
 import org.setu.electriccar.models.ChargingStation
 import org.setu.electriccar.models.Connector
-import com.google.android.material.button.MaterialButton
 
 class AddEditPointActivity : AppCompatActivity() {
 
@@ -41,7 +39,6 @@ class AddEditPointActivity : AppCompatActivity() {
         val foundStation = AppData.stations.findOne(stationId)
 
         if (foundStation == null) {
-            Toast.makeText(this, "Station not found", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -145,7 +142,6 @@ class AddEditPointActivity : AppCompatActivity() {
         val point = station.chargingPoints.find { it.pointId == pointId }
 
         if (point == null) {
-            Toast.makeText(this, "Point not found", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -207,8 +203,6 @@ class AddEditPointActivity : AppCompatActivity() {
 
             station.chargingPoints.add(point)
 
-            Toast.makeText(this, "Point added", Toast.LENGTH_SHORT).show()
-
         } else {
 
             val point = station.chargingPoints.find { it.pointId == editingPointId }
@@ -225,8 +219,6 @@ class AddEditPointActivity : AppCompatActivity() {
                     maxPower = maxPower
                 )
             }
-
-            Toast.makeText(this, "Point updated", Toast.LENGTH_SHORT).show()
         }
 
         finish()
