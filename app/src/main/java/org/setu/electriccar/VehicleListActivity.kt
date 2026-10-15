@@ -8,9 +8,11 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import org.setu.electriccar.models.Vehicle
 
 class VehicleListActivity : AppCompatActivity() {
 
@@ -51,6 +53,13 @@ class VehicleListActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
         }
 
+        val hint = TextView(this).apply {
+            text = "Tap a vehicle to edit – hold to delete"
+            textSize = 14f
+            gravity = Gravity.CENTER
+            setPadding(0, 8, 0, 16)
+        }
+
         val addButton = Button(this).apply {
             text = "Add Vehicle"
             setOnClickListener {
@@ -59,12 +68,12 @@ class VehicleListActivity : AppCompatActivity() {
             }
         }
 
-
         listLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
 
         root.addView(title)
+        root.addView(hint)
         root.addView(addButton)
         root.addView(listLayout)
 
@@ -79,7 +88,6 @@ class VehicleListActivity : AppCompatActivity() {
     private fun displayVehicles() {
 
         listLayout.removeAllViews()
-        AppData.saveCurrentUser()
 
         val vehicles = AppData.currentUser?.vehicles ?: ArrayList()
 
@@ -114,31 +122,41 @@ class VehicleListActivity : AppCompatActivity() {
                 textSize = 14f
             }
 
-            val editButton = Button(this).apply {
-                text = "Edit"
-                setOnClickListener {
-                    val intent = Intent(this@VehicleListActivity, AddEditVehicleActivity::class.java)
-                    intent.putExtra("id", vehicle.vehicleId)
-                    startActivity(intent)
-                }
+            // Tap the vehicle = edit it
+            vehicleLayout.setOnClickListener {
+                editVehicle(vehicle)
             }
 
-            val deleteButton = Button(this).apply {
-                text = "Delete"
-                setOnClickListener {
-                    AppData.currentUser?.vehicles?.removeAll { it.vehicleId == vehicle.vehicleId }
-                    AppData.saveCurrentUser()
-                    displayVehicles()
-                }
+            // Hold the vehicle = ask before deleting it
+            vehicleLayout.setOnLongClickListener {
+                confirmDelete(vehicle)
+                true
             }
 
             vehicleLayout.addView(vehicleName)
             vehicleLayout.addView(vehicleBattery)
             vehicleLayout.addView(vehicleConnector)
-            vehicleLayout.addView(editButton)
-            vehicleLayout.addView(deleteButton)
 
             listLayout.addView(vehicleLayout)
         }
+    }
+
+    private fun editVehicle(vehicle: Vehicle) {
+        val intent = Intent(this, AddEditVehicleActivity::class.java)
+        intent.putExtra("id", vehicle.vehicleId)
+        startActivity(intent)
+    }
+
+    private fun confirmDelete(vehicle: Vehicle) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete vehicle")
+            .setMessage("Are you sure you want to delete ${vehicle.make} ${vehicle.model}?")
+            .setPositiveButton("Delete") { _, _ ->
+                AppData.currentUser?.vehicles?.removeAll { it.vehicleId == vehicle.vehicleId }
+                AppData.saveCurrentUser()
+                displayVehicles()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }
