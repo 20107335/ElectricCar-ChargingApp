@@ -3,9 +3,11 @@ package org.setu.electriccar
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 class StationListActivity : AppCompatActivity() {
 
     private lateinit var listLayout: LinearLayout
+    private lateinit var connectorSpinner: Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,12 +37,35 @@ class StationListActivity : AppCompatActivity() {
             setPadding(0, 0, 0, 16)
         }
 
+        // Dropdown of connector types: "All" + every type used by the stations
+        val connectorTypes = ArrayList<String>()
+        connectorTypes.add("All")
+        for (station in AppData.stations.findAll()) {
+            for (point in station.chargingPoints) {
+                val type = point.connector?.connectorType ?: continue
+                if (!connectorTypes.contains(type)) {
+                    connectorTypes.add(type)
+                }
+            }
+        }
+
+        connectorSpinner = Spinner(this)
+        connectorSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, connectorTypes)
+
+        val filterButton = Button(this).apply {
+            text = "Filter"
+            setOnClickListener {
+                displayStations()
+            }
+        }
 
         listLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
 
         root.addView(title)
+        root.addView(connectorSpinner)
+        root.addView(filterButton)
         root.addView(listLayout)
 
         val scroll = ScrollView(this)
@@ -55,22 +81,23 @@ class StationListActivity : AppCompatActivity() {
         displayStations()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (::listLayout.isInitialized) {
-            displayStations()
-        }
-    }
-
     private fun displayStations() {
 
         listLayout.removeAllViews()
 
-        val stations = AppData.stations.findAll()
+        val selectedType = connectorSpinner.selectedItem.toString()
+
+        var stations = AppData.stations.findAll()
+
+        if (selectedType != "All") {
+            stations = stations.filter { station ->
+                station.chargingPoints.any { it.connector?.connectorType == selectedType }
+            }
+        }
 
         if (stations.isEmpty()) {
             listLayout.addView(TextView(this).apply {
-                text = "No charging stations available."
+                text = "No stations found for $selectedType."
                 textSize = 18f
                 setPadding(0, 40, 0, 40)
             })
