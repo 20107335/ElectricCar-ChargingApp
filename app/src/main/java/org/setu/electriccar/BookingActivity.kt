@@ -1,5 +1,7 @@
 package org.setu.electriccar
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.ArrayAdapter
@@ -19,6 +21,7 @@ import org.setu.electriccar.models.ChargingStation
 import org.setu.electriccar.models.Vehicle
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -102,13 +105,23 @@ class BookingActivity : AppCompatActivity() {
 
         val today = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
 
+        // Date box: can't type in it, tapping it opens the calendar
         dateInput = EditText(this).apply {
-            hint = "Date (dd/MM/yyyy)"
+            hint = "Tap to pick a date"
             setText(today)
+            isFocusable = false
+            setOnClickListener {
+                showDatePicker()
+            }
         }
 
+        // Time box: can't type in it, tapping it opens the clock
         timeInput = EditText(this).apply {
-            hint = "Time (HH:mm, e.g. 09:30)"
+            hint = "Tap to pick a time"
+            isFocusable = false
+            setOnClickListener {
+                showTimePicker()
+            }
         }
 
         messageText = TextView(this).apply {
@@ -152,6 +165,41 @@ class BookingActivity : AppCompatActivity() {
         return scroll
     }
 
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+
+        val dialog = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                // month starts at 0 (January = 0), so add 1
+                dateInput.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", day, month + 1, year))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+
+        // Can't pick a day in the past
+        dialog.datePicker.minDate = System.currentTimeMillis()
+        dialog.show()
+    }
+
+    private fun showTimePicker() {
+        val calendar = Calendar.getInstance()
+
+        val dialog = TimePickerDialog(
+            this,
+            { _, hour, minute ->
+                timeInput.setText(String.format(Locale.getDefault(), "%02d:%02d", hour, minute))
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        )
+
+        dialog.show()
+    }
+
     private fun confirmBooking() {
 
         val vehicle = vehicles[vehicleSpinner.selectedItemPosition]
@@ -169,7 +217,7 @@ class BookingActivity : AppCompatActivity() {
         }
 
         if (bookedDate == null) {
-            messageText.text = "Enter the date as dd/MM/yyyy and the time as HH:mm."
+            messageText.text = "Pick a date and a time."
             return
         }
 
