@@ -2,142 +2,66 @@ package org.setu.electriccar
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
+import android.view.View
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import org.setu.electriccar.models.Vehicle
 
 class VehicleListActivity : AppCompatActivity() {
 
-    private lateinit var listLayout: LinearLayout
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var emptyText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         enableEdgeToEdge()
+        setContentView(R.layout.activity_vehicle_list)
 
-        val scroll = createUserInterface()
-
-        ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.vehicleListRoot)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        recyclerView = findViewById(R.id.vehiclesRecyclerView)
+        emptyText = findViewById(R.id.emptyText)
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val vehicles = AppData.currentUser?.vehicles ?: ArrayList()
+
+        recyclerView.adapter = VehicleAdapter(
+            vehicles,
+            { vehicle -> editVehicle(vehicle) },
+            { vehicle -> confirmDelete(vehicle) }
+        )
+
+        findViewById<Button>(R.id.addVehicleButton).setOnClickListener {
+            startActivity(Intent(this, AddEditVehicleActivity::class.java))
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (::listLayout.isInitialized) {
-            displayVehicles()
-        }
+        refreshList()
     }
 
-    private fun createUserInterface(): ScrollView {
-
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(32, 32, 32, 32)
-        }
-
-        val title = TextView(this).apply {
-            text = "My Vehicles"
-            textSize = 28f
-            gravity = Gravity.CENTER
-        }
-
-        val hint = TextView(this).apply {
-            text = "Tap a vehicle to edit – hold to delete"
-            textSize = 14f
-            gravity = Gravity.CENTER
-            setPadding(0, 8, 0, 16)
-        }
-
-        val addButton = Button(this).apply {
-            text = "Add Vehicle"
-            setOnClickListener {
-                val intent = Intent(this@VehicleListActivity, AddEditVehicleActivity::class.java)
-                startActivity(intent)
-            }
-        }
-
-        listLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
-
-        root.addView(title)
-        root.addView(hint)
-        root.addView(addButton)
-        root.addView(listLayout)
-
-        val scroll = ScrollView(this)
-        scroll.addView(root)
-        setContentView(scroll)
-
-        displayVehicles()
-        return scroll
-    }
-
-    private fun displayVehicles() {
-
-        listLayout.removeAllViews()
+    private fun refreshList() {
+        recyclerView.adapter?.notifyDataSetChanged()
 
         val vehicles = AppData.currentUser?.vehicles ?: ArrayList()
-
         if (vehicles.isEmpty()) {
-            listLayout.addView(TextView(this).apply {
-                text = "No vehicles yet."
-                textSize = 18f
-                setPadding(0, 40, 0, 40)
-            })
-            return
-        }
-
-        for (vehicle in vehicles) {
-
-            val vehicleLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(0, 20, 0, 20)
-            }
-
-            val vehicleName = TextView(this).apply {
-                text = "${vehicle.vehicleId}: ${vehicle.make} ${vehicle.model}"
-                textSize = 20f
-            }
-
-            val vehicleBattery = TextView(this).apply {
-                text = "Battery: ${vehicle.batteryCapacity} kWh – Range: ~${vehicle.getRange()} km"
-                textSize = 16f
-            }
-
-            val vehicleConnector = TextView(this).apply {
-                text = "Connector: ${vehicle.connectorType}"
-                textSize = 14f
-            }
-
-            // Tap the vehicle = edit it
-            vehicleLayout.setOnClickListener {
-                editVehicle(vehicle)
-            }
-
-            // Hold the vehicle = ask before deleting it
-            vehicleLayout.setOnLongClickListener {
-                confirmDelete(vehicle)
-                true
-            }
-
-            vehicleLayout.addView(vehicleName)
-            vehicleLayout.addView(vehicleBattery)
-            vehicleLayout.addView(vehicleConnector)
-
-            listLayout.addView(vehicleLayout)
+            emptyText.visibility = View.VISIBLE
+        } else {
+            emptyText.visibility = View.GONE
         }
     }
 
@@ -154,7 +78,7 @@ class VehicleListActivity : AppCompatActivity() {
             .setPositiveButton("Delete") { _, _ ->
                 AppData.currentUser?.vehicles?.removeAll { it.vehicleId == vehicle.vehicleId }
                 AppData.saveCurrentUser()
-                displayVehicles()
+                refreshList()
             }
             .setNegativeButton("Cancel", null)
             .show()
