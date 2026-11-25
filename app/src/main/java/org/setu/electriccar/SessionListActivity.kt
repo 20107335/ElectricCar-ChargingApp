@@ -20,7 +20,6 @@ class SessionListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         enableEdgeToEdge()
 
         val scroll = createUserInterface()

@@ -106,7 +106,6 @@ class BookingActivity : AppCompatActivity() {
 
         val today = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
 
-        // Date box: can't type in it, tapping it opens the calendar
         dateInput = EditText(this).apply {
             hint = "Tap to pick a date"
             setText(today)
@@ -116,7 +115,6 @@ class BookingActivity : AppCompatActivity() {
             }
         }
 
-        // Time box: can't type in it, tapping it opens the clock
         timeInput = EditText(this).apply {
             hint = "Tap to pick a time"
             isFocusable = false

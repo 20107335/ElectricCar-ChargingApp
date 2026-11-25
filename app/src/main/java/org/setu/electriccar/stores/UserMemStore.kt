@@ -17,15 +17,12 @@ class UserMemStore(context: Context) {
             users = Gson().fromJson(file.readText(), type)
         }
     }
-
     fun save() {
         file.writeText(Gson().toJson(users))
     }
-
     fun findAll(): List<User> {
         return users
     }
-
     fun findByEmail(email: String): User? {
         return users.find { it.email.equals(email, ignoreCase = true) }
     }

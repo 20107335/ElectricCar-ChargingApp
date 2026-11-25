@@ -38,7 +38,6 @@ class StationListActivity : AppCompatActivity() {
             setPadding(0, 0, 0, 16)
         }
 
-        // Dropdown of connector types: "All" + every type used by the stations
         val connectorTypes = ArrayList<String>()
         connectorTypes.add("All")
         for (station in AppData.stations.findAll()) {

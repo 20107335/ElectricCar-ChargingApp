@@ -2,8 +2,6 @@ package org.setu.electriccar
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.setu.electriccar.models.Route
-import org.setu.electriccar.models.User
 import org.setu.electriccar.models.Vehicle
 
 class ModelsTest {
