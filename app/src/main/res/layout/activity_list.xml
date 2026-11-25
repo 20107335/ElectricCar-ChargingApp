@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/vehicleListRoot"
+    android:id="@+id/listRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/vehiclesTitle"
+        android:id="@+id/listTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="My Vehicles"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -22,14 +21,27 @@
         android:gravity="center"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:text="Tap a vehicle to edit – hold to delete"
         android:textSize="14sp" />
 
-    <Button
-        android:id="@+id/addVehicleButton"
+    <Spinner
+        android:id="@+id/connectorSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Vehicle" />
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/filterButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Filter"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/addButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Vehicle"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/emptyText"
@@ -37,12 +49,12 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="40dp"
-        android:text="No vehicles yet."
+        android:text="Nothing here yet."
         android:textSize="18sp"
         android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/vehiclesRecyclerView"
+        android:id="@+id/listRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />

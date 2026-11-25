@@ -3,7 +3,10 @@ package org.setu.electriccar
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,24 +20,30 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        findViewById<Button>(R.id.viewStationsButton).setOnClickListener {
-            startActivity(Intent(this, StationListActivity::class.java))
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
         }
 
-        findViewById<Button>(R.id.viewVehiclesButton).setOnClickListener {
-            startActivity(Intent(this, VehicleListActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.myBookingsButton).setOnClickListener {
-            startActivity(Intent(this, SessionListActivity::class.java))
-        }
+        findViewById<Button>(R.id.viewStationsButton).setOnClickListener { openList("stations") }
+        findViewById<Button>(R.id.viewVehiclesButton).setOnClickListener { openList("vehicles") }
+        findViewById<Button>(R.id.myBookingsButton).setOnClickListener { openList("bookings") }
 
         findViewById<Button>(R.id.logoutButton).setOnClickListener {
             AppData.logout()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
+    }
+
+    // One list screen, told which list to show
+    private fun openList(mode: String) {
+        val intent = Intent(this, ListActivity::class.java)
+        intent.putExtra("mode", mode)
+        startActivity(intent)
     }
 }
