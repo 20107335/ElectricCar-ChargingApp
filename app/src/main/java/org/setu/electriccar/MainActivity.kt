@@ -33,6 +33,13 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.viewVehiclesButton).setOnClickListener { openList("vehicles") }
         findViewById<Button>(R.id.myBookingsButton).setOnClickListener { openList("bookings") }
 
+        // Dark / Light mode toggle
+        val nightModeButton = findViewById<Button>(R.id.nightModeButton)
+        nightModeButton.text = if (AppData.isNightMode()) "Light Mode" else "Dark Mode"
+        nightModeButton.setOnClickListener {
+            AppData.setNightMode(!AppData.isNightMode())
+        }
+
         findViewById<Button>(R.id.logoutButton).setOnClickListener {
             AppData.logout()
             startActivity(Intent(this, LoginActivity::class.java))
