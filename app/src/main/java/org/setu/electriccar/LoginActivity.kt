@@ -3,6 +3,7 @@ package org.setu.electriccar
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import android.view.Gravity
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -17,8 +18,13 @@ import org.setu.electriccar.models.User
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
+        val start = System.currentTimeMillis()
+        splash.setKeepOnScreenCondition { System.currentTimeMillis() - start < 1500 }
+
         super.onCreate(savedInstanceState)
         AppData.setup(applicationContext)
+        // ...everything else stays the same
 
         if (AppData.currentUser != null) {
             openMenu()
