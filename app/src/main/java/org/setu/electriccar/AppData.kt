@@ -2,6 +2,7 @@ package org.setu.electriccar
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatDelegate
 import org.setu.electriccar.models.ChargingPoint
 import org.setu.electriccar.models.ChargingStation
 import org.setu.electriccar.models.Connector
@@ -22,6 +23,8 @@ object AppData {
         store.relink()
 
         prefs = context.getSharedPreferences("ev_prefs", Context.MODE_PRIVATE)
+        applyNightMode()
+
         val savedEmail = prefs.getString("loggedInEmail", null)
         if (savedEmail != null) {
             currentUser = store.findUser(savedEmail)
@@ -38,6 +41,25 @@ object AppData {
         prefs.edit().remove("loggedInEmail").apply()
     }
 
+    // ---------- Night mode ----------
+    fun isNightMode(): Boolean {
+        return prefs.getBoolean("nightMode", false)
+    }
+
+    fun setNightMode(on: Boolean) {
+        prefs.edit().putBoolean("nightMode", on).apply()
+        applyNightMode()
+    }
+
+    private fun applyNightMode() {
+        if (isNightMode()) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+    }
+
+    // ---------- Stations ----------
     private fun addStations() {
         addStation("SETU Cork Road Charger", "Cork Road, Waterford", "24 hours",
             point(1, 22.0, 0.35, "Type 2", 22),
